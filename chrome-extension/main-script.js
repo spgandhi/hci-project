@@ -1,99 +1,97 @@
+var url = document.URL;
+
+if(url.indexOf("https://www.google.") > -1 && (url.indexOf('#') > -1 || url.indexOf('q=') > -1)){
+	$(document).ready(function(){		
+		var new_data = new_query();
+	})
+
+}
+
+
 // Global Variable
 
-data = {};
+query_data = {};
+
 replace_data = false;
 
 // Hash Change Update Event
 $(window).bind( 'hashchange', function(e) {
   var hash = location.hash;
  	replace_data = false;
- 	data = {};
- 	alert(data);
- 	get_data("hash");
-});
 
-var url = document.URL;
-var pageTitle = document.title;
+ 	query_data.click_time = [];
+ 	query_data.result_index = [];
 
+ 	query_data.query = $('.gsfi').val()
+ 	start_time = new Date();
 
-// // If only google.com
-// if(url.indexOf("https://www.google.") > -1 && (url.indexOf('#') == -1 && url.indexOf('q=') == -1)){
-// 	$(document).ready(function(){
-// 		only_get();	
-// 	})
-	
-// }
-
-if(url.indexOf("https://www.google.") > -1 && (url.indexOf('#') > -1 || url.indexOf('q=') > -1)){
-	
-	$(document).ready(function(){		
-		var new_data = get_data("nothing");
-	})
-
-}
-
-
-// function only_get(){
-// 	chrome.storage.sync.get('hci-data',function(result){
-		
-// 		var old_date = result['hci-data'];
-
-// 		if(isNaN(old_data)){
-// 			update_data(0);
-// 		}else{
-// 			output(count);
-// 		}
-// 	});
-// }
-
-function get_data(what){
-	
-
-	start = new Date();
-
-	var query_ = $('.gsfi').val();
-
-	if(what=="hash"){
-		// alert("hash");
-		// alert(replace_data);
-		// alert(start);
-		// alert(query_);
-	}
-
-	data = {
-		query: query_,
-		time: [],
-		number:[] 	
-	}
-
-	if(what=="hash"){
-		console.log(data);
-	}
-	// console.log(data);
-
+ 	setTimeout(function(){ 
 	$('.r a').bind('click',function(){
-		if(what=="hash"){
-		console.log("clicked");
-	}
-
+		
 		var main_parent = $(this).parent().parent().parent();
 		var number_ = main_parent.index();
 		
-		data.number.push(number_);
+		query_data.result_index.push(number_);
 
-		stop = new Date();
-		// console.log('Diff = ' + (stop-start) );
-		diff = stop-start;	
-		data.time.push(diff);
+		
+		
+		time_diff = new Date() - start_time;	
+		query_data.click_time.push(time_diff);
 
 		chrome.storage.sync.get('hci-data',function(result){
 
-			if(Object.keys(result).length==0){
+			if(Object.keys(result).length==0)
 				create_array();
-				alert();
-			}
+			
+			update_data(query_data);
 
-			update_data(data);
+		});
+		
+	})
+
+}, 1000);
+	
+});
+
+
+function new_query(){
+	
+	start_time = new Date();
+	user_query = $('.gsfi').val();
+
+	query_data = {
+		query: user_query,
+		click_time: [],
+		result_index:[] 	
+	}
+
+	click_time = new Date();
+
+	click_binding();
+
+
+}
+
+function click_binding(){
+
+	$('.r a').bind('click',function(){
+		
+		var main_parent = $(this).parent().parent().parent();
+		var number_ = main_parent.index();
+		
+		query_data.result_index.push(number_);
+
+		
+		
+		time_diff = new Date() - start_time;	
+		query_data.click_time.push(time_diff);
+
+		chrome.storage.sync.get('hci-data',function(result){
+
+			if(Object.keys(result).length==0)
+				create_array();
+			
+			update_data(query_data);
 
 		});
 		
@@ -111,75 +109,18 @@ function update_data(new_data){
 		if(replace_data==false){
 			result['hci-data'].push(new_data);
 			replace_data = true;
-		}
-		else{
+		}else{
 			result['hci-data'].pop();
 			result['hci-data'].push(new_data);
 		}
+
 		chrome.storage.sync.set({'hci-data': result['hci-data']});
 		output(result['hci-data']);
+
 	})
-	
-}	
-
-//My Content On Page
-function output(count){
-	console.log(count);
-	// Getting URLs
-	// var options_page_URL = chrome.extension.getURL('options.html');
-	// var gear_image_URL = 'http://simpleicon.com/wp-content/uploads/gear-2.png';
-	
-
-	// Removing previous instance of display
-	// $('.googly').remove();
-	
-
-	// Creating New Instance
-	// var append = '<div class="googly">Total Google Search : ' + count;
-	// var append = append + '<img class="options-link" style="width:20px;cursor: pointer;position:relative; top:4px; left:15px;" src="'+gear_image_URL+'"></div>';
-	
-
-	// Appending the Instance
-	// $(append).prependTo('body');
-
-
-	// Script to open options page upon click
-	// $( ".options-link" ).click(function() {
-		// chrome.runtime.sendMessage({greeting: "OpenPage", filename:"options.html"}, function(response) {
-			// console.log(response);
-		// });
-	// });
-
-
-	// Appling CSS to the 
-	$('.googly').css({
-		'position': 'fixed',
-		'right': 0,
-		'width': '200px',
-		'margin-right': '5px',
-		'z-index': '100101010101',
-		'background': 'rgb(240,240,240)',
-		'font-size': '14px',
-		'padding': '8px',
-		'bottom': 0,
-		'font-family': '"Jura", sans-serif',
-		'color': 'rgb(65,65,65)',
-		'font-weight': 'bolder',
-		'border-radius': '4px',
-	});
-
-
-
-	$('.button').css({
-		'background' : 'aquamarine',
-		'width': '100%',
-		'padding-top': '10px',
-		'text-align': 'center',
-		'margin': 0,
-		'transition': 'all 0.3s ease-in-out'
-	});
 	
 }
 
-
-
+function output(all_data){
+	// console.log(all_data);	
+}

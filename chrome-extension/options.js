@@ -1,70 +1,36 @@
-count = 0;
-	
-	chrome.storage.sync.get('googly_data',function(result){
-		count = result['googly_data'];
-		if(isNaN(count)){
-			var append = "Current Counter : 0";
-		}else{
-			var append = "Current Counter : " + count;
-		}
-		$('.current-counter').replaceWith(append);
-	});
 
-	chrome.storage.sync.get('googly_total',function(result){
-		total_count = result['googly_total'];
-		if(isNaN(total_count)){
-			var append = "Total Counter : " + count + " | ";
-		}else{
-			var append = "Total Counter : " + (total_count + count)  + " | ";
-		}
-		$('.total-counter').replaceWith(append);
-	});
-
-
-$(".reset").click(function(){
-
-	chrome.storage.sync.get('googly_data',function(result){
-		count = result['googly_data'];
-
-
-	chrome.storage.sync.get('googly_total', function(result){
-		current_total = result['googly_total'];
-
-		if(isNaN(current_total)){
-			chrome.storage.sync.set({'googly_total' : 0});
-				
-				chrome.storage.sync.get('googly_total', function(result){
-					current_total = result['googly_total'];
-					new_total = current_total + count;
-
-					chrome.storage.sync.set({'googly_total':new_total});
-
-					chrome.storage.sync.set({'googly_data': 0});
-					output();
-					
-				});
-		}else{
-			
-			new_total = current_total + count;
-
-			chrome.storage.sync.set({'googly_total':new_total});	    
-    		chrome.storage.sync.set({'googly_data' : 0 }); 
-    		output();
-		}
-	});
-		
-
-    });
+chrome.storage.sync.get('hci-data', function(result){
+	print_data(result);
 });
 
+function print_data(result){
 
-function output(){
-	
-    	var url = document.URL;
-    	$(location).attr('href',url);
+	html = '<table border="1"><tr><th>Query</th><th>Times Clicked</th><th>Indexes</th><th>Time</th></tr>';
 
-    
+	for (i=0; i<result['hci-data'].length; i++){
+
+		html += '<tr><td>'+result['hci-data'][i]['query']+'</td>';
+		html += '<td>'+result['hci-data'][i]['result_index'].length+'</td>';
+		html += '<td>'+get_result_index(result['hci-data'][i]['result_index'])+'</td>';
+		html += '<td>'+get_result_index(result['hci-data'][i]['click_time'])+'</td>';
+		html += '</tr>';
+		
+
+	}
+
+	html += '</table>'
+	document.write(html);
+
 }
 
+function get_result_index(data){
+	
+	html = '';
+	
+	for (j=0; j<data.length; j++) {
+		html += data[j];
+		html += ', ';
+	}
 
-
+	return html;
+}
